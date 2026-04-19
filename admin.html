@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+    <title>Admin Portal - SentriX</title>
+    <meta name="description" content="Administrator dashboard for managing civic complaints">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800;900&family=Epilogue:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Admin Specific Styles -->
+    <style>
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+            padding-top: 64px;
+        }
+
+        .admin-sidebar {
+            width: 250px;
+            background: var(--bg2);
+            border-right: 1px solid var(--border);
+            padding: 1rem;
+            flex-shrink: 0;
+        }
+
+        .admin-main {
+            flex: 1;
+            padding: 2rem;
+            overflow-x: auto;
+        }
+
+        .admin-section {
+            margin-bottom: 2rem;
+        }
+
+        .admin-section h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--w3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+        }
+
+        .admin-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            background: transparent;
+            border: none;
+            color: var(--w2);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: left;
+            font-family: 'Epilogue', sans-serif;
+        }
+
+        .admin-menu-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--white);
+        }
+
+        .admin-menu-item.active {
+            background: rgba(37, 99, 235, 0.2);
+            color: #60a5fa;
+            border: 1px solid rgba(37, 99, 235, 0.3);
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-label {
+            font-size: 14px;
+            color: var(--w3);
+            font-weight: 500;
+        }
+
+        .complaints-table {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--w3);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            color: var(--w2);
+            font-size: 14px;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-open {
+            background: rgba(96, 165, 250, 0.2);
+            color: #60a5fa;
+        }
+
+        .status-progress {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--amber);
+        }
+
+        .status-resolved {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--green);
+        }
+
+        @media(max-width:768px) {
+            .admin-layout {
+                flex-direction: column;
+                display: block;
+            }
+
+            .admin-main {
+                padding: 1rem;
+                overflow-x: hidden;
+            }
+
+            .admin-main h1 {
+                font-size: 1.5rem !important;
+                margin-bottom: 1rem !important;
+                margin-top: 0.5rem !important;
+            }
+
+            .table-header {
+                padding: 1rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .admin-sidebar {
+                position: fixed;
+                top: 64px;
+                left: -100%;
+                width: 260px;
+                height: calc(100vh - 64px);
+                background: var(--bg2);
+                backdrop-filter: blur(20px);
+                z-index: 999;
+                transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                border-right: 1px solid var(--border);
+                border-bottom: none;
+                overflow-y: auto;
+            }
+
+            .admin-sidebar.mob-active {
+                left: 0;
+            }
+
+            .sidebar-overlay {
+                position: fixed;
+                inset: 0;
+                top: 64px;
+                background: rgba(0, 0, 0, 0.6);
+                z-index: 998;
+                display: none;
+                opacity: 0;
+                transition: opacity 0.3s;
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+                opacity: 1;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .complaints-table {
+                overflow-x: hidden;
+                border: none;
+                background: transparent;
+            }
+
+            table,
+            thead,
+            tbody,
+            th,
+            td,
+            tr {
+                display: block;
+                width: 100%;
+                max-width: 100%;
+            }
+
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            tr {
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                margin-bottom: 1rem;
+                background: var(--bg2);
+                padding: 0.5rem;
+            }
+
+            td {
+                border: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                position: relative;
+                padding-left: 40% !important;
+                padding-top: 0.75rem !important;
+                padding-bottom: 0.75rem !important;
+                text-align: right !important;
+                min-height: 3rem;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                white-space: normal;
+                word-break: break-word;
+            }
+
+            td:last-child {
+                border-bottom: 0;
+            }
+
+            td:before {
+                position: absolute;
+                top: 50%;
+                left: 1rem;
+                transform: translateY(-50%);
+                width: 35%;
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: 600;
+                color: var(--w3);
+                font-size: 12px;
+                text-transform: uppercase;
+                content: attr(data-label);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="container nav-inner">
+            <div class="nav-logo" onclick="window.location.href='index.html'">SentriX Admin</div>
+            <div class="nav-links">
+                <button class="nav-link" onclick="window.location.href='index.html'">Home</button>
+                <button class="nav-link" onclick="window.location.href='dashboard.html'">Dashboard</button>
+                <button class="nav-link active" onclick="window.location.href='admin.html'">Admin</button>
+            </div>
+            <div class="nav-right">
+                <div id="navUser" style="align-items:center;gap:.6rem;">
+                    <div class="nav-user-pill">
+                        <div class="nav-avatar">A</div>
+                        <span class="nav-uname">Admin</span>
+                    </div>
+                    <button class="btn btn-ghost btn-sm" onclick="logoutUser()">Logout</button>
+                </div>
+                <button class="ham" id="hamBtn" onclick="toggleMobNav()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Admin Layout -->
+    <div class="admin-layout">
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleAdminSidebar()"></div>
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="admin-section">
+                <h3>Overview</h3>
+                <button class="admin-menu-item active" onclick="showAdminSection('dashboard')">
+                    <span>?</span> Dashboard
+                </button>
+                <button class="admin-menu-item" onclick="showAdminSection('complaints')">
+                    <span>?</span> All Complaints
+                </button>
+                <button class="admin-menu-item" onclick="showAdminSection('analytics')">
+                    <span>?</span> Analytics
+                </button>
+                <button class="admin-menu-item" onclick="showAdminSection('updates')">
+                    <span>?</span> Updates
+                </button>
+            </div>
+
+            <div class="admin-section">
+                <h3>Departments</h3>
+                <button class="admin-menu-item" onclick="showAdminSection('water')">
+                    <span>?</span> Water Supply
+                </button>
+                <button class="admin-menu-item" onclick="showAdminSection('roads')">
+                    <span>?</span> Roads
+                </button>
+                <button class="admin-menu-item" onclick="showAdminSection('safety')">
+                    <span>?</span> Safety
+                </button>
+                <button class="admin-menu-item" onclick="showAdminSection('garbage')">
+                    <span>?</span> Garbage
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Dashboard Section -->
+            <div id="admin-dashboard" class="admin-content">
+                <h1 style="font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; margin-bottom: 2rem;">
+                    Admin Dashboard</h1>
+
+                <!-- KPI Cards -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="kpi-open-dash" style="color: #60a5fa;">31</div>
+                        <div class="kpi-label">Open Complaints</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" style="color: var(--red);">3</div>
+                        <div class="kpi-label">SLA Breaches</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="kpi-resolved-dash" style="color: var(--green);">47</div>
+                        <div class="kpi-label">Resolved Complaints</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="kpi-avgprio-dash" style="color: var(--amber);">6.4</div>
+                        <div class="kpi-label">Avg Priority</div>
+                    </div>
+                </div>
+
+                <!-- Recent Complaints -->
+                <div class="complaints-table">
+                    <div class="table-header">
+                        <h3>Recent Complaints</h3>
+                        <button class="btn btn-primary btn-sm" onclick="window.location.href='admin.html'">View
+                            All</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Assigned</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTableBody">
+                            <tr>
+                                <td data-label="ID" style="font-family: 'JetBrains Mono', monospace;">SX-08741</td>
+                                <td data-label="Category">💧</td>
+                                <td data-label="Description" style="white-space: normal; word-break: break-word;">Water
+                                    supply disruption</td>
+                                <td data-label="Priority"><span style="color: var(--red); font-weight: 700;">9.1</span>
+                                </td>
+                                <td data-label="Status"><span class="status-badge status-progress">In Progress</span>
+                                </td>
+                                <td data-label="Assigned">Officer Sharma</td>
+                            </tr>
+                            <tr>
+                                <td data-label="ID" style="font-family: 'JetBrains Mono', monospace;">SX-08756</td>
+                                <td data-label="Category">💡</td>
+                                <td data-label="Description" style="white-space: normal; word-break: break-word;">Street
+                                    light failure</td>
+                                <td data-label="Priority"><span style="color: var(--red); font-weight: 700;">8.6</span>
+                                </td>
+                                <td data-label="Status"><span class="status-badge status-open">Open</span></td>
+                                <td data-label="Assigned">Unassigned</td>
+                            </tr>
+                            <tr>
+                                <td data-label="ID" style="font-family: 'JetBrains Mono', monospace;">SX-08719</td>
+                                <td data-label="Category">🚧</td>
+                                <td data-label="Description" style="white-space: normal; word-break: break-word;">
+                                    Pothole causing accidents</td>
+                                <td data-label="Priority"><span
+                                        style="color: var(--amber); font-weight: 700;">7.8</span></td>
+                                <td data-label="Status"><span class="status-badge status-open">Open</span></td>
+                                <td data-label="Assigned">Officer Kumar</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- All Complaints Section -->
+            <div id="admin-complaints" class="admin-content" style="display: none;">
+                <h1 style="font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; margin-bottom: 2rem;">All
+                    Complaints</h1>
+
+                <div class="complaints-table">
+                    <div class="table-header">
+                        <h3>Complaint Management (31 Total)</h3>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-outline btn-sm">Export CSV</button>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th>Location</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Filed</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allComplaintsTableBody">
+                            <tr>
+                                <td data-label="ID" style="font-family: 'JetBrains Mono', monospace;">SX-08741</td>
+                                <td data-label="Category">💧</td>
+                                <td data-label="Description" style="white-space: normal; word-break: break-word;">No
+                                    water for 3 days</td>
+                                <td data-label="Location">Andheri W</td>
+                                <td data-label="Priority"><span style="color: var(--red); font-weight: 700;">9.1</span>
+                                </td>
+                                <td data-label="Status"><span class="status-badge status-progress">In Progress</span>
+                                </td>
+                                <td data-label="Filed">5 Jan</td>
+                                <td data-label="Action"><button class="btn btn-outline btn-sm">View</button></td>
+                            </tr>
+                            <tr>
+                                <td data-label="ID" style="font-family: 'JetBrains Mono', monospace;">SX-08756</td>
+                                <td data-label="Category">💡</td>
+                                <td data-label="Description" style="white-space: normal; word-break: break-word;">Street
+                                    light failure</td>
+                                <td data-label="Location">Kurla E</td>
+                                <td data-label="Priority"><span style="color: var(--red); font-weight: 700;">8.6</span>
+                                </td>
+                                <td data-label="Status"><span class="status-badge status-open">Open</span></td>
+                                <td data-label="Filed">5 Jan</td>
+                                <td data-label="Action"><button class="btn btn-primary btn-sm">Assign</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Analytics Section -->
+            <div id="admin-analytics" class="admin-content" style="display: none;">
+                <h1 style="font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; margin-bottom: 2rem;">
+                    Analytics</h1>
+
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="kpi-total" style="color: var(--purple);">1,284</div>
+                        <div class="kpi-label">Total Complaints</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="kpi-rate" style="color: var(--green);">84%</div>
+                        <div class="kpi-label">Resolution Rate</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" style="color: var(--amber);">18.4h</div>
+                        <div class="kpi-label">Avg Resolution Time</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" style="color: #60a5fa;">4.6/5</div>
+                        <div class="kpi-label">Citizen Satisfaction</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Updates Section -->
+            <div id="admin-updates" class="admin-content" style="display: none;">
+                <h1 style="font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; margin-bottom: 2rem;">
+                    Create Update Post</h1>
+
+                <div class="complaints-table">
+                    <div class="table-header">
+                        <h3>Post New Update</h3>
+                    </div>
+                    <div style="padding: 2rem;">
+                        <form id="updatePostForm" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div>
+                                    <label
+                                        style="display: block; margin-bottom: 0.5rem; color: var(--w3); font-size: 14px; font-weight: 500;">Complaint
+                                        ID</label>
+                                    <input type="text" id="complaintId" placeholder="e.g., SX-08741"
+                                        style="width: 100%; padding: 0.75rem; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; color: var(--white); font-family: inherit;">
+                                </div>
+                                <div>
+                                    <label
+                                        style="display: block; margin-bottom: 0.5rem; color: var(--w3); font-size: 14px; font-weight: 500;">User
+                                        Name</label>
+                                    <input type="text" id="userName" placeholder="Enter user name"
+                                        style="width: 100%; padding: 0.75rem; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; color: var(--white); font-family: inherit;">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label
+                                    style="display: block; margin-bottom: 0.5rem; color: var(--w3); font-size: 14px; font-weight: 500;">Title</label>
+                                <input type="text" id="updateTitle" placeholder="Enter update title"
+                                    style="width: 100%; padding: 0.75rem; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; color: var(--white); font-family: inherit;">
+                            </div>
+
+                            <div>
+                                <label
+                                    style="display: block; margin-bottom: 0.5rem; color: var(--w3); font-size: 14px; font-weight: 500;">Description</label>
+                                <textarea id="updateDescription" rows="4" placeholder="Enter detailed description"
+                                    style="width: 100%; padding: 0.75rem; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; color: var(--white); font-family: inherit; resize: vertical;"></textarea>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div>
+                                    <label
+                                        style="display: block; margin-bottom: 0.5rem; color: var(--w3); font-size: 14px; font-weight: 500;">Location</label>
+                                    <input type="text" id="updateLocation" placeholder="e.g., Andheri West"
+                                        style="width: 100%; padding: 0.75rem; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; color: var(--white); font-family: inherit;">
+                                </div>
+                                <div>
+                                    <label
+                                        style="display: block; margin-bottom: 0.5rem; color: var(--w3); font-size: 14px; font-weight: 500;">Status</label>
+                                    <select id="updateStatus"
+                                        style="width: 100%; padding: 0.75rem; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; color: var(--white); font-family: inherit;">
+                                        <option value="Resolved">Resolved</option>
+                                        <option value="In Progress">In Progress</option>
+                                        <option value="Open">Open</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label
+                                    style="display: block; margin-bottom: 0.5rem; color: var(--w3); font-size: 14px; font-weight: 500;">Image
+                                    URL (Optional)</label>
+                                <input type="text" id="updateImage" placeholder="https://example.com/image.jpg"
+                                    style="width: 100%; padding: 0.75rem; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; color: var(--white); font-family: inherit;">
+                            </div>
+
+                            <div style="display: flex; gap: 1rem;">
+                                <button type="submit" class="btn btn-primary">Post Update</button>
+                                <button type="button" class="btn btn-outline"
+                                    onclick="document.getElementById('updatePostForm').reset()">Clear</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- External JavaScript -->
+    <script src="script.js"></script>
+
+    <!-- Admin Specific JavaScript -->
+    <script>
+        function toggleAdminSidebar() {
+            const sidebar = document.getElementById('adminSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (sidebar) sidebar.classList.toggle('mob-active');
+            if (overlay) overlay.classList.toggle('active');
+        }
+
+        // Hook up the hamburger menu event
+        window.addEventListener('DOMContentLoaded', () => {
+            const hamBtn = document.getElementById('hamBtn');
+            if (hamBtn) {
+                // Remove original onclick to prevent default toggleMobNav
+                hamBtn.removeAttribute('onclick');
+                hamBtn.addEventListener('click', (e) => {
+                    toggleAdminSidebar();
+                    // Keep animation effect on hamburger
+                    hamBtn.classList.toggle('active');
+                    let expanded = hamBtn.getAttribute('aria-expanded') === 'true';
+                    hamBtn.setAttribute('aria-expanded', !expanded);
+                });
+            }
+        });
+
+        function showAdminSection(section) {
+            console.log('Showing section:', section);
+
+            let targetId = `admin-${section}`;
+            let filterType = 'all';
+
+            if (['water', 'roads', 'safety', 'garbage', 'assigned', 'pending-resolved'].includes(section)) {
+                targetId = 'admin-complaints';
+                filterType = section;
+            } else if (section === 'complaints') {
+                targetId = 'admin-complaints';
+                filterType = 'all';
+            }
+
+            // Hide all sections
+            document.querySelectorAll('.admin-content').forEach(content => {
+                content.style.display = 'none';
+            });
+
+            // Remove active class from all menu items
+            document.querySelectorAll('.admin-menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Show selected section
+            const targetSection = document.getElementById(targetId);
+            if (targetSection) {
+                targetSection.style.display = 'block';
+            }
+
+            // Trigger mapping if window logic exists
+            if (window.applyAdminFilter) {
+                window.applyAdminFilter(filterType);
+            }
+
+            // Add active class to clicked menu item
+            if (event && event.target && event.target.closest) {
+                const btn = event.target.closest('.admin-menu-item');
+                if (btn) btn.classList.add('active');
+            }
+
+            // Auto close sidebar on mobile after selection
+            if (window.innerWidth <= 768) {
+                toggleAdminSidebar();
+                const hamBtn = document.getElementById('hamBtn');
+                if (hamBtn) {
+                    hamBtn.classList.remove('active');
+                    hamBtn.setAttribute('aria-expanded', 'false');
+                }
+            }
+        }
+
+        // Updates functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const updateForm = document.getElementById('updatePostForm');
+            if (updateForm) {
+                updateForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    // Get form values
+                    const complaintId = document.getElementById('complaintId').value;
+                    const userName = document.getElementById('userName').value;
+                    const title = document.getElementById('updateTitle').value;
+                    const description = document.getElementById('updateDescription').value;
+                    const location = document.getElementById('updateLocation').value;
+                    const status = document.getElementById('updateStatus').value;
+                    const image = document.getElementById('updateImage').value;
+
+                    // Validate required fields
+                    if (!complaintId || !userName || !title || !description || !location) {
+                        alert('Please fill in all required fields');
+                        return;
+                    }
+
+                    // Create update post object
+                    const updatePost = {
+                        id: Date.now().toString(),
+                        complaintId: complaintId,
+                        userName: userName,
+                        title: title,
+                        description: description,
+                        location: location,
+                        status: status,
+                        image: image,
+                        date: new Date().toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                        })
+                    };
+
+                    // Get existing updates from localStorage
+                    let updates = JSON.parse(localStorage.getItem('updates') || '[]');
+
+                    // Add new update to the beginning
+                    updates.unshift(updatePost);
+
+                    // Keep only last 50 updates to prevent storage issues
+                    if (updates.length > 50) {
+                        updates = updates.slice(0, 50);
+                    }
+
+                    // Save to localStorage
+                    localStorage.setItem('updates', JSON.stringify(updates));
+
+                    // Show success message
+                    const successDiv = document.createElement('div');
+                    successDiv.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: rgba(16, 185, 129, 0.9);
+                        color: white;
+                        padding: 1rem 1.5rem;
+                        border-radius: 8px;
+                        font-weight: 500;
+                        z-index: 9999;
+                        animation: slideIn 0.3s ease-out;
+                    `;
+                    successDiv.textContent = 'Update posted successfully!';
+                    document.body.appendChild(successDiv);
+
+                    // Remove success message after 3 seconds
+                    setTimeout(() => {
+                        successDiv.remove();
+                    }, 3000);
+
+                    // Reset form
+                    updateForm.reset();
+                });
+            }
+        });
+    </script>
+    <script type="module" src="firebase-backend.js"></script>
+</body>
+
+</html>

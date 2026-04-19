@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+    <title>Submit Complaint - SentriX</title>
+    <meta name="description" content="Submit a civic complaint to SentriX AI Grievance Intelligence Platform">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800;900&family=Epilogue:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Submit Page Specific Styles -->
+    <style>
+        .submit-container {
+            min-height: 100vh;
+            padding: 5rem 0 2rem;
+        }
+
+        .submit-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .submit-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: var(--grad);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .submit-description {
+            font-size: 1.1rem;
+            color: var(--w2);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        .submit-form {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .form-section-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-section-description {
+            color: var(--w3);
+            margin-bottom: 1.5rem;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--white);
+            font-size: 14px;
+        }
+
+        .required {
+            color: var(--red);
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--white);
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: 'Epilogue', sans-serif;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #60a5fa;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-select {
+            cursor: pointer;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .category-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .category-card.selected {
+            background: rgba(96, 165, 250, 0.1);
+            border-color: #60a5fa;
+        }
+
+        .category-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .category-name {
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 0.25rem;
+        }
+
+        .category-description {
+            font-size: 12px;
+            color: var(--w3);
+        }
+
+        .priority-slider {
+            margin-top: 1rem;
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--border);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--grad);
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--grad);
+            cursor: pointer;
+            border: none;
+        }
+
+        .priority-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 12px;
+            color: var(--w3);
+        }
+
+        .file-upload {
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload:hover {
+            border-color: #60a5fa;
+            background: rgba(96, 165, 250, 0.05);
+        }
+
+        .file-upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--w3);
+        }
+
+        .file-upload-text {
+            color: var(--white);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-upload-hint {
+            color: var(--w3);
+            font-size: 14px;
+        }
+
+        .submit-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .submit-button {
+            padding: 1rem 3rem;
+            background: var(--grad);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Epilogue', sans-serif;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(96, 165, 250, 0.3);
+        }
+
+        .save-draft-button {
+            padding: 1rem 2rem;
+            background: transparent;
+            color: var(--w2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Epilogue', sans-serif;
+        }
+
+        .save-draft-button:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: var(--white);
+        }
+
+        @media(max-width:768px) {
+            .submit-form {
+                padding: 2rem 1.5rem;
+                margin: 0 1rem;
+            }
+
+            .submit-title {
+                font-size: 2rem;
+            }
+
+            .category-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .submit-actions {
+                flex-direction: column;
+            }
+
+            .submit-button,
+            .save-draft-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="container nav-inner">
+            <div class="nav-logo" onclick="window.location.href='index.html'">SentriX</div>
+            <div class="nav-links">
+                <button class="nav-link" onclick="window.location.href='index.html'">Home</button>
+                <button class="nav-link active" onclick="window.location.href='submit.html'">Submit</button>
+                <button class="nav-link" onclick="window.location.href='track.html'">Track</button>
+                <button class="nav-link" onclick="window.location.href='dashboard.html'">My Complaints</button>
+            </div>
+            <div class="nav-right">
+                <div id="navGuest" style="display:flex;gap:.5rem">
+                    <button class="btn btn-primary btn-sm" onclick="window.location.href='login.html'">Login</button>
+                </div>
+                <div id="navUser" class="hidden" style="align-items:center;gap:.6rem;">
+                    <div class="nav-user-pill">
+                        <div class="nav-avatar">R</div>
+                        <span class="nav-uname">Rahul</span>
+                    </div>
+                </div>
+                <button class="ham" id="hamBtn" onclick="toggleMobNav()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Submit Content -->
+    <div class="submit-container">
+        <div class="container">
+            <div class="submit-header">
+                <h1 class="submit-title">File a Complaint</h1>
+                <p class="submit-description">Let our AI system analyze and route your grievance to the right department
+                    for quick resolution</p>
+            </div>
+
+            <form class="submit-form" onsubmit="event.preventDefault(); handleSubmit();">
+                <!-- Category Selection -->
+                <div class="form-section">
+                    <h2 class="form-section-title">
+                        <span>?</span>
+                        Select Category
+                    </h2>
+                    <p class="form-section-description">Choose the category that best describes your issue</p>
+                    <div class="category-grid">
+                        <div class="category-card" onclick="selectCategory(this, 'water')">
+                            <div class="category-icon">?</div>
+                            <div class="category-name">Water Supply</div>
+                            <div class="category-description">Water shortage, contamination</div>
+                        </div>
+                        <div class="category-card" onclick="selectCategory(this, 'roads')">
+                            <div class="category-icon">?</div>
+                            <div class="category-name">Roads</div>
+                            <div class="category-description">Potholes, damage, repair</div>
+                        </div>
+                        <div class="category-card" onclick="selectCategory(this, 'garbage')">
+                            <div class="category-icon">?</div>
+                            <div class="category-name">Garbage</div>
+                            <div class="category-description">Collection, dumping, cleanup</div>
+                        </div>
+                        <div class="category-card" onclick="selectCategory(this, 'electricity')">
+                            <div class="category-icon">?</div>
+                            <div class="category-name">Electricity</div>
+                            <div class="category-description">Power cuts, transformers</div>
+                        </div>
+                        <div class="category-card" onclick="selectCategory(this, 'safety')">
+                            <div class="category-icon">?</div>
+                            <div class="category-name">Safety</div>
+                            <div class="category-description">Street lights, security</div>
+                        </div>
+                        <div class="category-card" onclick="selectCategory(this, 'other')">
+                            <div class="category-icon">?</div>
+                            <div class="category-name">Other</div>
+                            <div class="category-description">Miscellaneous issues</div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="category" name="category" required>
+                </div>
+
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <h2 class="form-section-title">
+                        <span>?</span>
+                        Complaint Details
+                    </h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="title">
+                                Complaint Title <span class="required">*</span>
+                            </label>
+                            <input type="text" id="title" name="title" class="form-input"
+                                placeholder="Brief description of the issue" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="location">
+                                Location <span class="required">*</span>
+                            </label>
+                            <input type="text" id="location" name="location" class="form-input"
+                                placeholder="Where is this issue located?" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="description">
+                            Detailed Description <span class="required">*</span>
+                        </label>
+                        <textarea id="description" name="description" class="form-textarea"
+                            placeholder="Provide detailed information about the issue, when it started, impact on residents, etc."
+                            required></textarea>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="form-section">
+                    <h2 class="form-section-title">
+                        <span>?</span>
+                        Contact Information
+                    </h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="name">
+                                Your Name <span class="required">*</span>
+                            </label>
+                            <input type="text" id="name" name="name" class="form-input"
+                                placeholder="Enter your full name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="phone">
+                                Phone Number
+                            </label>
+                            <input type="tel" id="phone" name="phone" class="form-input" placeholder="+91 98765 43210">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="email">
+                            Email Address <span class="required">*</span>
+                        </label>
+                        <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com"
+                            required>
+                    </div>
+                </div>
+
+                <!-- Priority Level -->
+                <div class="form-section">
+                    <h2 class="form-section-title">
+                        <span>?</span>
+                        Priority Level
+                    </h2>
+                    <p class="form-section-description">How urgent is this issue?</p>
+                    <div class="priority-slider">
+                        <input type="range" id="priority" name="priority" class="slider" min="1" max="10" value="5">
+                        <div class="priority-labels">
+                            <span>Low (1)</span>
+                            <span>Medium (5)</span>
+                            <span>High (10)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attachments -->
+                <div class="form-section">
+                    <h2 class="form-section-title">
+                        <span>?</span>
+                        Attachments (Optional)
+                    </h2>
+                    <div class="file-upload" onclick="document.getElementById('attachments').click()">
+                        <div class="file-upload-icon">?</div>
+                        <div class="file-upload-text">Click to upload files</div>
+                        <div class="file-upload-hint">Support for images, videos, documents (Max 10MB)</div>
+                        <input type="file" id="attachments" name="attachments" multiple
+                            accept="image/*,video/*,.pdf,.doc,.docx" style="display: none;">
+                    </div>
+                </div>
+
+                <!-- Submit Actions -->
+                <div class="submit-actions">
+                    <button type="button" class="save-draft-button" onclick="saveDraft()">
+                        Save as Draft
+                    </button>
+                    <button type="submit" class="submit-button">
+                        Submit Complaint
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- External JavaScript -->
+    <script src="script.js"></script>
+
+    <!-- Submit Page Specific JavaScript -->
+    <script>
+        let selectedCategory = null;
+
+        function selectCategory(element, category) {
+            // Remove selected class from all cards
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            // Add selected class to clicked card
+            element.classList.add('selected');
+
+            // Set hidden input value
+            document.getElementById('category').value = category;
+            selectedCategory = category;
+        }
+
+        function handleSubmit() {
+            const category = document.getElementById('category').value;
+            const title = document.getElementById('title').value;
+            const location = document.getElementById('location').value;
+            const description = document.getElementById('description').value;
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const priority = document.getElementById('priority').value;
+
+            // Validation
+            if (!category || !title || !location || !description || !name || !email) {
+                toast('Please fill in all required fields');
+                return;
+            }
+
+            // Generate complaint ID
+            const complaintId = 'SX-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 90000) + 10000);
+
+            // Show loading
+            toast('Submitting complaint...');
+
+            // Simulate submission
+            setTimeout(() => {
+                // Store complaint data
+                const complaintData = {
+                    id: complaintId,
+                    category: category,
+                    title: title,
+                    location: location,
+                    description: description,
+                    name: name,
+                    email: email,
+                    priority: priority,
+                    status: 'submitted',
+                    submittedAt: new Date().toISOString()
+                };
+
+                // Save to localStorage (in real app, this would be sent to server)
+                let complaints = JSON.parse(localStorage.getItem('complaints') || '[]');
+                complaints.push(complaintData);
+                localStorage.setItem('complaints', JSON.stringify(complaints));
+
+                // Show success message
+                toast(`Complaint submitted successfully! ID: ${complaintId}`);
+
+                // Redirect to track page
+                setTimeout(() => {
+                    window.location.href = `track.html?id=${complaintId}`;
+                }, 2000);
+            }, 1500);
+        }
+
+        function saveDraft() {
+            const category = document.getElementById('category').value;
+            const title = document.getElementById('title').value;
+            const location = document.getElementById('location').value;
+            const description = document.getElementById('description').value;
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const priority = document.getElementById('priority').value;
+
+            const draftData = {
+                category: category,
+                title: title,
+                location: location,
+                description: description,
+                name: name,
+                email: email,
+                priority: priority,
+                savedAt: new Date().toISOString()
+            };
+
+            localStorage.setItem('complaint_draft', JSON.stringify(draftData));
+            toast('Draft saved successfully!');
+        }
+
+        // Load draft if exists
+        document.addEventListener('DOMContentLoaded', function () {
+            const draft = localStorage.getItem('complaint_draft');
+            if (draft) {
+                const draftData = JSON.parse(draft);
+
+                // Fill form with draft data
+                if (draftData.category) {
+                    const categoryCard = document.querySelector(`[onclick="selectCategory(this, '${draftData.category}')"]`);
+                    if (categoryCard) {
+                        selectCategory(categoryCard, draftData.category);
+                    }
+                }
+
+                if (draftData.title) document.getElementById('title').value = draftData.title;
+                if (draftData.location) document.getElementById('location').value = draftData.location;
+                if (draftData.description) document.getElementById('description').value = draftData.description;
+                if (draftData.name) document.getElementById('name').value = draftData.name;
+                if (draftData.email) document.getElementById('email').value = draftData.email;
+                if (draftData.priority) document.getElementById('priority').value = draftData.priority;
+
+                toast('Draft loaded from previous session');
+            }
+        });
+    </script>
+    <script type="module" src="firebase-backend.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+    <title>Track Complaint - SentriX</title>
+    <meta name="description"
+        content="Track your civic complaint status with SentriX AI Grievance Intelligence Platform">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800;900&family=Epilogue:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Track Page Specific Styles -->
+    <style>
+        .track-container {
+            min-height: 100vh;
+            padding: 5rem 0 2rem;
+        }
+
+        .track-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .track-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: var(--grad);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .track-description {
+            font-size: 1.1rem;
+            color: var(--w2);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        .track-search {
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .search-form {
+            display: flex;
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        .search-input-group {
+            flex: 1;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--white);
+            font-size: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #60a5fa;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+        }
+
+        .search-button {
+            padding: 1rem 2rem;
+            background: var(--grad);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Epilogue', sans-serif;
+            white-space: nowrap;
+        }
+
+        .search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(96, 165, 250, 0.3);
+        }
+
+        .track-result {
+            max-width: 800px;
+            margin: 0 auto;
+            display: none;
+        }
+
+        .complaint-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .complaint-header {
+            padding: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .complaint-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--white);
+        }
+
+        .complaint-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .complaint-id {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(96, 165, 250, 0.2);
+            color: #60a5fa;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .complaint-date {
+            color: var(--w3);
+            font-size: 14px;
+        }
+
+        .complaint-priority {
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .priority-high {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--red);
+        }
+
+        .priority-medium {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--amber);
+        }
+
+        .priority-low {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--green);
+        }
+
+        .complaint-status {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-submitted {
+            background: rgba(96, 165, 250, 0.2);
+            color: #60a5fa;
+        }
+
+        .status-in-progress {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--amber);
+        }
+
+        .status-resolved {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--green);
+        }
+
+        .status-escalated {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--red);
+        }
+
+        .complaint-body {
+            padding: 2rem;
+        }
+
+        .complaint-details {
+            margin-bottom: 2rem;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 1rem;
+            align-items: flex-start;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--w3);
+            width: 120px;
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+
+        .detail-value {
+            color: var(--white);
+            flex: 1;
+            line-height: 1.6;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.4rem;
+            top: 0.5rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--bg2);
+            border: 2px solid var(--border);
+        }
+
+        .timeline-item.completed::before {
+            background: var(--green);
+            border-color: var(--green);
+        }
+
+        .timeline-item.current::before {
+            background: #60a5fa;
+            border-color: #60a5fa;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(96, 165, 250, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(96, 165, 250, 0);
+            }
+        }
+
+        .timeline-date {
+            font-size: 12px;
+            color: var(--w3);
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-description {
+            color: var(--w2);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .actions {
+            padding: 2rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .action-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Epilogue', sans-serif;
+        }
+
+        .action-primary {
+            background: var(--grad);
+            color: var(--white);
+        }
+
+        .action-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(96, 165, 250, 0.3);
+        }
+
+        .action-secondary {
+            background: transparent;
+            color: var(--w2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .action-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: var(--white);
+        }
+
+        .action-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--red);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .action-danger:hover {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: var(--w3);
+        }
+
+        .no-results-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .no-results-text {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .no-results-hint {
+            font-size: 14px;
+            color: var(--w4);
+        }
+
+        @media(max-width:768px) {
+            .track-search {
+                margin: 0 1rem 2rem;
+                padding: 1.5rem;
+            }
+
+            .search-form {
+                flex-direction: column;
+            }
+
+            .search-button {
+                width: 100%;
+            }
+
+            .complaint-header {
+                padding: 1.5rem;
+            }
+
+            .complaint-body {
+                padding: 1.5rem;
+            }
+
+            .actions {
+                padding: 1.5rem;
+            }
+
+            .action-button {
+                flex: 1;
+                min-width: 120px;
+            }
+
+            .detail-row {
+                flex-direction: column;
+            }
+
+            .detail-label {
+                width: auto;
+                margin-bottom: 0.25rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="container nav-inner">
+            <div class="nav-logo" onclick="window.location.href='index.html'">SentriX</div>
+            <div class="nav-links">
+                <button class="nav-link" onclick="window.location.href='index.html'">Home</button>
+                <button class="nav-link" onclick="window.location.href='submit.html'">Submit</button>
+                <button class="nav-link active" onclick="window.location.href='track.html'">Track</button>
+                <button class="nav-link" onclick="window.location.href='dashboard.html'">My Complaints</button>
+            </div>
+            <div class="nav-right">
+                <div id="navGuest" style="display:flex;gap:.5rem">
+                    <button class="btn btn-primary btn-sm" onclick="window.location.href='login.html'">Login</button>
+                </div>
+                <div id="navUser" class="hidden" style="align-items:center;gap:.6rem;">
+                    <div class="nav-user-pill">
+                        <div class="nav-avatar">R</div>
+                        <span class="nav-uname">Rahul</span>
+                    </div>
+                </div>
+                <button class="ham" id="hamBtn" onclick="toggleMobNav()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Track Content -->
+    <div class="track-container">
+        <div class="container">
+            <div class="track-header">
+                <h1 class="track-title">Track Your Complaint</h1>
+                <p class="track-description">Enter your complaint ID to get real-time updates on the status and
+                    resolution progress</p>
+            </div>
+
+            <div class="track-search">
+                <form class="search-form" onsubmit="event.preventDefault(); handleTrack();">
+                    <div class="search-input-group">
+                        <input type="text" id="complaintId" class="search-input"
+                            placeholder="Enter complaint ID (e.g., SX-2025-08741)" pattern="SX-[0-9]{4}-[0-9]{5}"
+                            required>
+                    </div>
+                    <button type="submit" class="search-button">Track Complaint</button>
+                </form>
+            </div>
+
+            <div id="trackResult" class="track-result">
+                <!-- Results will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- External JavaScript -->
+    <script src="script.js"></script>
+
+    <!-- Track Page Specific JavaScript -->
+    <script>
+        function handleTrack() {
+            const complaintId = document.getElementById('complaintId').value.trim();
+
+            if (!complaintId) {
+                toast('Please enter a complaint ID');
+                return;
+            }
+
+            // Show loading
+            toast('Searching for complaint...');
+
+            // Simulate API call
+            setTimeout(() => {
+                displayComplaintDetails(complaintId);
+            }, 1000);
+        }
+
+        function displayComplaintDetails(complaintId) {
+            // Get complaints from localStorage (in real app, this would be an API call)
+            const complaints = JSON.parse(localStorage.getItem('complaints') || '[]');
+
+            // Find the complaint
+            const complaint = complaints.find(c => c.id === complaintId);
+
+            if (!complaint) {
+                // Show sample data for demo
+                showSampleComplaint(complaintId);
+                return;
+            }
+
+            // Display actual complaint
+            renderComplaint(complaint);
+        }
+
+        function showSampleComplaint(complaintId) {
+            const sampleComplaint = {
+                id: complaintId,
+                category: 'water',
+                title: 'Water supply disruption - no water for 3 days',
+                location: 'Andheri West, Mumbai',
+                description: 'There has been no water supply in our area for the past 3 days. This is affecting daily life and hygiene. Multiple residents have complained but no action has been taken yet.',
+                name: 'Rahul Mehta',
+                email: 'rahul.mehta@example.com',
+                phone: '+91 98765 43210',
+                priority: 9.1,
+                status: 'in-progress',
+                submittedAt: new Date('2025-01-05T09:14:00').toISOString(),
+                timeline: [
+                    {
+                        date: '05 Jan 2025, 09:14 AM',
+                        title: 'Complaint submitted',
+                        description: 'Filed via SentriX web portal. Tracking ID assigned.',
+                        completed: true
+                    },
+                    {
+                        date: '05 Jan 2025, 09:14 AM',
+                        title: 'AI analysis complete',
+                        description: 'Category: Water. Sentiment: Urgent. Priority: 9.1/10. Processed in 1.4s.',
+                        completed: true
+                    },
+                    {
+                        date: '05 Jan 2025, 09:15 AM',
+                        title: 'Routed to Water & Sanitation Dept',
+                        description: 'Auto-routed. SLA clock started: 24 hours.',
+                        completed: true
+                    },
+                    {
+                        date: '05 Jan 2025, 11:30 AM',
+                        title: 'Officer Sharma assigned',
+                        description: 'Field inspection scheduled. Nearest water main identified on map.',
+                        completed: true
+                    },
+                    {
+                        date: 'Pending',
+                        title: 'Action taken',
+                        description: 'Awaiting field team update.',
+                        completed: false,
+                        current: true
+                    },
+                    {
+                        date: 'Pending',
+                        title: 'Resolved',
+                        description: 'Pending resolution confirmation from officer.',
+                        completed: false
+                    }
+                ]
+            };
+
+            renderComplaint(sampleComplaint);
+        }
+
+        function renderComplaint(complaint) {
+            const resultDiv = document.getElementById('trackResult');
+
+            const priorityClass = complaint.priority >= 8 ? 'priority-high' :
+                complaint.priority >= 5 ? 'priority-medium' : 'priority-low';
+
+            const statusClass = complaint.status === 'resolved' ? 'status-resolved' :
+                complaint.status === 'in-progress' ? 'status-in-progress' :
+                    complaint.status === 'escalated' ? 'status-escalated' : 'status-submitted';
+
+            const statusText = complaint.status.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+            resultDiv.innerHTML = `
+                <div class="complaint-card">
+                    <div class="complaint-header">
+                        <h2 class="complaint-title">${complaint.title}</h2>
+                        <div class="complaint-meta">
+                            <span class="complaint-id">${complaint.id}</span>
+                            <span class="complaint-date">${formatDate(complaint.submittedAt)}</span>
+                            <span class="complaint-priority ${priorityClass}">Priority: ${complaint.priority}/10</span>
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <span class="complaint-status ${statusClass}">${statusText}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="complaint-body">
+                        <div class="complaint-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Category:</span>
+                                <span class="detail-value">${complaint.category.charAt(0).toUpperCase() + complaint.category.slice(1)} Supply</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Location:</span>
+                                <span class="detail-value">${complaint.location}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">${complaint.description}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Submitted by:</span>
+                                <span class="detail-value">${complaint.name} (${complaint.email})</span>
+                            </div>
+                            ${complaint.phone ? `
+                            <div class="detail-row">
+                                <span class="detail-label">Contact:</span>
+                                <span class="detail-value">${complaint.phone}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                        
+                        <h3 style="font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--white);">Timeline</h3>
+                        <div class="timeline">
+                            ${complaint.timeline.map((item, index) => `
+                                <div class="timeline-item ${item.completed ? 'completed' : ''} ${item.current ? 'current' : ''}">
+                                    <div class="timeline-date">${item.date}</div>
+                                    <div class="timeline-title">${item.title}</div>
+                                    <div class="timeline-description">${item.description}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="actions">
+                        <button class="action-button action-primary" onclick="downloadReport('${complaint.id}')">
+                            Download Report
+                        </button>
+                        <button class="action-button action-secondary" onclick="shareComplaint('${complaint.id}')">
+                            Share
+                        </button>
+                        <button class="action-button action-secondary" onclick="printComplaint('${complaint.id}')">
+                            Print
+                        </button>
+                        ${complaint.status !== 'resolved' ? `
+                        <button class="action-button action-danger" onclick="escalateComplaint('${complaint.id}')">
+                            Escalate
+                        </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+
+            resultDiv.style.display = 'block';
+
+            // Scroll to result
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function downloadReport(complaintId) {
+            toast(`Generating report for ${complaintId}...`);
+            setTimeout(() => {
+                toast('Report downloaded successfully!');
+            }, 1500);
+        }
+
+        function shareComplaint(complaintId) {
+            const shareUrl = `${window.location.origin}${window.location.pathname}?id=${complaintId}`;
+            if (navigator.share) {
+                navigator.share({
+                    title: `Complaint ${complaintId}`,
+                    text: 'Track this complaint status',
+                    url: shareUrl
+                });
+            } else {
+                navigator.clipboard.writeText(shareUrl);
+                toast('Link copied to clipboard!');
+            }
+        }
+
+        function printComplaint(complaintId) {
+            window.print();
+        }
+
+        function escalateComplaint(complaintId) {
+            if (confirm('Are you sure you want to escalate this complaint?')) {
+                toast(`Escalating complaint ${complaintId}...`);
+                setTimeout(() => {
+                    toast('Complaint escalated to department head!');
+                }, 1500);
+            }
+        }
+
+        // Check for URL parameters
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const complaintId = urlParams.get('id');
+
+            if (complaintId) {
+                document.getElementById('complaintId').value = complaintId;
+                handleTrack();
+            }
+        });
+    </script>
+    <script type="module" src="firebase-backend.js"></script>
+</body>
+
+</html>
